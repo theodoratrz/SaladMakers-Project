@@ -11,23 +11,22 @@
 #include <time.h>
 #include <errno.h>
 
-#define SEGMENTSIZE (5*sizeof(int) + 4*sizeof(sem_t))
+#define SEGMENTSIZE (6*sizeof(int) + 4*sizeof(sem_t))
 #define SEGMENTPERM 0666
 
+enum{TOMATO, PEPPER, ONION};
 
 int main(int argc, char* argv[])
 {
-	int id,retval;
+	int id,retval,index, previous = -1;
+	int* veggie_table, *flag1,*flag2,*flag3;
+	int* nof_salads;
+	int no_wait = 1;
+
 	key_t key = ftok(".", 2);
     sem_t *chef;
-
-	int* veggie_table, *flag;
-	int* nof_salads;
-
     sem_t *onion_saladmaker;
-
 	sem_t *pepper_saladmaker;
-
 	sem_t *tomato_saladmaker;
 
     id = shmget(key, SEGMENTSIZE, IPC_CREAT|SEGMENTPERM);
@@ -50,7 +49,9 @@ int main(int argc, char* argv[])
 	veggie_table = (int *)(tomato_saladmaker+3);
 
 	nof_salads = veggie_table+3;
-	flag = nof_salads+1;
+	flag1 = nof_salads+1;
+	flag2 = flag1+1;
+	flag3 = flag2+1;
     /* Initialize the semaphore. */
 	retval = sem_init(chef,1,1);
 	if (retval != 0) {
@@ -79,7 +80,12 @@ int main(int argc, char* argv[])
 		exit(3);
 	}
 
-	*nof_salads = 5;
+	srand(time(NULL));
+
+	veggie_table[TOMATO] = 0;
+	veggie_table[PEPPER] = 0;
+	veggie_table[ONION] = 0;
+	*nof_salads = 15;
 
 	while(1)
 	{
@@ -87,26 +93,82 @@ int main(int argc, char* argv[])
 
 		if((*nof_salads) != 0)
 		{
-			*flag = 1;
-			veggie_table[0] = 1;	// tomato
-			veggie_table[1] = 1;	// pepper
-			veggie_table[2] = 0;	// onion
-			printf("chef: salad left %d\n",*nof_salads);
+			*flag1 = 1;
+			*flag2 = 1;
+			*flag3 = 1;
+			index = rand()%3;
+			//index = rand()%2;
+			while(index == previous)
+			{
+				index = rand()%3;
+				//index = rand()%2;
+			}
+			previous = index;
+			switch (index)
+			{
+			case 0:
+				veggie_table[TOMATO] += 1;
+				veggie_table[PEPPER] += 1;
+				printf("chef: salad left %d\n",*nof_salads);
+				sem_post(onion_saladmaker);
+				break;
+			case 1:
+				veggie_table[PEPPER] += 1;
+				veggie_table[ONION] += 1;
+				printf("chef: salad left %d\n",*nof_salads);
+				sem_post(tomato_saladmaker);
+				break;
+			case 2:
+				veggie_table[TOMATO] += 1;
+				veggie_table[ONION] += 1;
+				printf("chef: salad left %d\n",*nof_salads);
+				sem_post(pepper_saladmaker);
+				break;
+			default:
+				break;
+			}
 		}
 		else
 		{
-			if((*flag) == 0)
-			{
-				break;
-			}	
+			break;
 		}
-		sem_post(onion_saladmaker);
 	}
-		if (shmdt((void *)chef) == -1) 
-		{   //shared memory detach
-			perror("Failed to destroy shared memory segment");
-			return 1;
+
+	while(1)
+	{
+		if(no_wait == 0)
+		{
+			sem_wait(chef);
 		}
+		else
+		{
+			no_wait = 0;
+		}
+		
+		if((*flag1) != 0)
+		{
+			sem_post(onion_saladmaker);
+		}
+		else if((*flag2) != 0)
+		{
+			sem_post(tomato_saladmaker);
+		}
+		else if((*flag3) != 0)
+		{
+			sem_post(pepper_saladmaker);
+		}
+		else
+		{
+			break;
+		}	
+		
+	}
+
+	if (shmdt((void *)chef) == -1) 
+	{   //shared memory detach
+		perror("Failed to destroy shared memory segment");
+		return 1;
+	}
 
 	if (shmctl(id, IPC_RMID, 0 ) <0) {
 	perror("semctl");

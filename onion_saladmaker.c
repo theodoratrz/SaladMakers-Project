@@ -10,6 +10,8 @@
 #include <sys/wait.h>
 #include <time.h>
 
+enum{TOMATO, PEPPER, ONION};
+
 int main(int argc, char* argv[])
 {
     sem_t *chef;
@@ -24,7 +26,7 @@ int main(int argc, char* argv[])
 	sem_t *tomato_saladmaker;
 
     int key = atoi(argv[1]);
-    int *flag;
+    int *flag1,*flag2,*flag3;
 
     chef = (sem_t*) shmat(key, (void*)0,0);
 	if ( chef == (void *) -1) { perror("Attachment."); exit(2);}
@@ -35,22 +37,23 @@ int main(int argc, char* argv[])
 	veggie_table = (int *)(tomato_saladmaker+3);
 
 	nof_salads = veggie_table+3;
-    flag = nof_salads+1;
+    flag1 = nof_salads+1;
+	flag2 = flag1+1;
+	flag3 = flag2+1;
 
     while(1)
     {
         sem_wait(onion_saladmaker);
         if((*nof_salads) != 0)
         {
-            veggie_table[0] = 0;
-            veggie_table[1] = 0;
-            veggie_table[2] = 0;
+            veggie_table[TOMATO]--;
+            veggie_table[PEPPER]--;
             (*nof_salads)--;
             printf("onion: salad left %d\n", *nof_salads);
         }
         else
         {
-            *flag = 0;
+            *flag1 = 0;
             sem_post(chef);
             if (shmdt((void *)chef) == -1) 
             {  /* shared memory detach */
