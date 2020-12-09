@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
 	sem_t *tomato_saladmaker;
 
     int key = atoi(argv[1]);
-    int *flag1,*flag2,*flag3;
+    int *flag1,*flag2,*flag3,*sum_of_salads;
 
     chef = (sem_t*) shmat(key, (void*)0,0);
 	if ( chef == (void *) -1) { perror("Attachment."); exit(2);}
@@ -40,6 +40,7 @@ int main(int argc, char* argv[])
     flag1 = nof_salads+1;
 	flag2 = flag1+1;
 	flag3 = flag2+1;
+    sum_of_salads = flag3+1;
 
     while(1)
     {
@@ -49,6 +50,7 @@ int main(int argc, char* argv[])
             veggie_table[ONION]--;
             veggie_table[PEPPER]--;
             (*nof_salads)--;
+            (*sum_of_salads)++;
             printf("tomato: salad left %d\n", *nof_salads);
         }
         else

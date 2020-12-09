@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 {
 	int id,retval,index, previous = -1;
 	int* veggie_table, *flag1,*flag2,*flag3;
-	int* nof_salads;
+	int* nof_salads, *sum_of_salads;
 	int no_wait = 1;
 
 	key_t key = ftok(".", 2);
@@ -52,6 +52,7 @@ int main(int argc, char* argv[])
 	flag1 = nof_salads+1;
 	flag2 = flag1+1;
 	flag3 = flag2+1;
+	sum_of_salads = flag3+1;
     /* Initialize the semaphore. */
 	retval = sem_init(chef,1,1);
 	if (retval != 0) {
@@ -86,7 +87,7 @@ int main(int argc, char* argv[])
 	veggie_table[PEPPER] = 0;
 	veggie_table[ONION] = 0;
 	*nof_salads = 15;
-
+	*sum_of_salads = 0;
 	while(1)
 	{
 		sem_wait(chef);
@@ -164,6 +165,7 @@ int main(int argc, char* argv[])
 		
 	}
 
+	printf("sum of salads: %d\n", *sum_of_salads);
 	if (shmdt((void *)chef) == -1) 
 	{   //shared memory detach
 		perror("Failed to destroy shared memory segment");
