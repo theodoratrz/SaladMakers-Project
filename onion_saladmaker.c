@@ -18,6 +18,7 @@ int main(int argc, char* argv[])
 
 	int* veggie_table;
 	int* nof_salads;
+    int low_bound, upp_bound,key,cooking_time;
 
     sem_t *onion_saladmaker;
 
@@ -25,7 +26,25 @@ int main(int argc, char* argv[])
 
 	sem_t *tomato_saladmaker;
 
-    int key = atoi(argv[1]);
+    for(int i = 1; i < argc; i+=2 )
+    {
+        if(!(strcmp(argv[i], "-t1")))
+        {
+            low_bound = atoi(argv[i+1]);
+        }
+        else if(!(strcmp(argv[i], "-t2")))
+        {
+            upp_bound = atoi(argv[i+1]);
+        }
+        else if(!(strcmp(argv[i], "-s")))
+        {
+            key = atoi(argv[i+1]);
+        }
+    }
+    srand(time(NULL));
+    cooking_time = (rand() % (upp_bound - low_bound +1)) + low_bound;
+    
+    //int key = atoi(argv[1]);
     int *flag1,*flag2,*flag3,*sum_of_salads;
 
     chef = (sem_t*) shmat(key, (void*)0,0);
@@ -50,8 +69,7 @@ int main(int argc, char* argv[])
             veggie_table[TOMATO]--;
             veggie_table[PEPPER]--;
             (*nof_salads)--;
-            (*sum_of_salads)++;
-            printf("onion: salad left %d\n", *nof_salads);
+            printf("ONION: start salad %d\n",*sum_of_salads);
         }
         else
         {
@@ -62,9 +80,16 @@ int main(int argc, char* argv[])
                 perror("Failed to destroy shared memory segment");
                 return 1;
             }
-            break;
+            return 0;
         }
-        
+        sem_post(chef);
+
+        sleep(cooking_time);
+
+        sem_wait(onion_saladmaker);
+        printf("onion sleeped for %d\n", cooking_time);
+        (*sum_of_salads)++;
+        printf("onion: salads made %d\n", *sum_of_salads);
         sem_post(chef);
     }
 

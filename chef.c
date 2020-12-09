@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 	int id,retval,index, previous = -1;
 	int* veggie_table, *flag1,*flag2,*flag3;
 	int* nof_salads, *sum_of_salads;
-	int no_wait = 1;
+	int mantime,no_wait = 1;
 
 	key_t key = ftok(".", 2);
     sem_t *chef;
@@ -86,7 +86,18 @@ int main(int argc, char* argv[])
 	veggie_table[TOMATO] = 0;
 	veggie_table[PEPPER] = 0;
 	veggie_table[ONION] = 0;
-	*nof_salads = 15;
+	//*nof_salads = 15;
+	if( !(strcmp(argv[1], "-n")) )
+	{
+		*nof_salads = atoi(argv[2]);
+		mantime = atoi(argv[4]);
+	}
+	else if( !(strcmp(argv[1], "-m")) )
+	{
+		mantime = atoi(argv[2]);
+		*nof_salads = atoi(argv[4]);
+	}
+
 	*sum_of_salads = 0;
 	while(1)
 	{
@@ -98,11 +109,10 @@ int main(int argc, char* argv[])
 			*flag2 = 1;
 			*flag3 = 1;
 			index = rand()%3;
-			//index = rand()%2;
+			
 			while(index == previous)
 			{
 				index = rand()%3;
-				//index = rand()%2;
 			}
 			previous = index;
 			switch (index)
@@ -133,6 +143,8 @@ int main(int argc, char* argv[])
 		{
 			break;
 		}
+		sleep(mantime);
+		printf("sleeped for %d\n", mantime);
 	}
 
 	while(1)
