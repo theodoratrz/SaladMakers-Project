@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 {
 	int id,retval,index, previous = -1;
 	int* veggie_table, *flag1,*flag2,*flag3;
-	int* nof_salads, *sum_of_salads;
+	int* nof_salads, *sum_of_salads, *onion_salads, *tomato_salads, *pepper_salads;
 	int mantime,no_wait = 1;
 
 	key_t key = ftok(".", 2);
@@ -53,6 +53,10 @@ int main(int argc, char* argv[])
 	flag2 = flag1+1;
 	flag3 = flag2+1;
 	sum_of_salads = flag3+1;
+	onion_salads = sum_of_salads+1;
+	tomato_salads = onion_salads+1;
+	pepper_salads = tomato_salads+1;
+
     /* Initialize the semaphore. */
 	retval = sem_init(chef,1,1);
 	if (retval != 0) {
@@ -86,6 +90,11 @@ int main(int argc, char* argv[])
 	veggie_table[TOMATO] = 0;
 	veggie_table[PEPPER] = 0;
 	veggie_table[ONION] = 0;
+
+	*onion_salads = 0;
+	*tomato_salads = 0;
+	*pepper_salads = 0;
+
 	//*nof_salads = 15;
 	if( !(strcmp(argv[1], "-n")) )
 	{
@@ -120,19 +129,22 @@ int main(int argc, char* argv[])
 			case 0:
 				veggie_table[TOMATO] += 1;
 				veggie_table[PEPPER] += 1;
-				printf("chef: salad left %d\n",*nof_salads);
+				//printf("chef: salad left %d\n",*nof_salads);
+				printf("chef calling onion\n");
 				sem_post(onion_saladmaker);
 				break;
 			case 1:
 				veggie_table[PEPPER] += 1;
 				veggie_table[ONION] += 1;
-				printf("chef: salad left %d\n",*nof_salads);
+				//printf("chef: salad left %d\n",*nof_salads);
+				printf("chef calling tomato\n");
 				sem_post(tomato_saladmaker);
 				break;
 			case 2:
 				veggie_table[TOMATO] += 1;
 				veggie_table[ONION] += 1;
-				printf("chef: salad left %d\n",*nof_salads);
+				//printf("chef: salad left %d\n",*nof_salads);
+				printf("chef calling pepper\n");
 				sem_post(pepper_saladmaker);
 				break;
 			default:
@@ -178,6 +190,7 @@ int main(int argc, char* argv[])
 	}
 
 	printf("sum of salads: %d\n", *sum_of_salads);
+	printf("onion made: %d salad(s), tomato made: %d salad(s), pepper made: %d salad(s)\n", *onion_salads, *tomato_salads, *pepper_salads);
 	if (shmdt((void *)chef) == -1) 
 	{   //shared memory detach
 		perror("Failed to destroy shared memory segment");

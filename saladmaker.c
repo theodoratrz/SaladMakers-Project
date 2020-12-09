@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
     sem_t *chef;
 
 	int* veggie_table;
-	int* nof_salads;
+	int* nof_salads,*onion_salads, *tomato_salads, *pepper_salads;
     int low_bound, upp_bound,key,cooking_time;
     char ingredient;
 
@@ -65,7 +65,13 @@ int main(int argc, char* argv[])
 	flag2 = flag1+1;
 	flag3 = flag2+1;
     sum_of_salads = flag3+1;
+    onion_salads = sum_of_salads+1;
+	tomato_salads = onion_salads+1;
+	pepper_salads = tomato_salads+1;
 
+    *onion_salads = 0;
+	*tomato_salads = 0;
+	*pepper_salads = 0;
     switch (ingredient)
     {
     case 'o':
@@ -77,7 +83,7 @@ int main(int argc, char* argv[])
                 veggie_table[TOMATO]--;
                 veggie_table[PEPPER]--;
                 (*nof_salads)--;
-                printf("ONION: start salad %d\n",*sum_of_salads);
+                printf("ONION: start salad\n");
             }
             else
             {
@@ -96,8 +102,9 @@ int main(int argc, char* argv[])
 
             sem_wait(onion_saladmaker);
             printf("onion sleeped for %d\n", cooking_time);
+            (*onion_salads)++;
             (*sum_of_salads)++;
-            printf("onion: salads made %d\n", *sum_of_salads);
+            //printf("onion: salads made %d\n", *sum_of_salads);
             sem_post(chef);
         }
 
@@ -111,7 +118,7 @@ int main(int argc, char* argv[])
                 veggie_table[ONION]--;
                 veggie_table[PEPPER]--;
                 (*nof_salads)--;
-                printf("TOMATO: start salad %d\n", *sum_of_salads);
+                printf("TOMATO: start salad\n");
             }
             else
             {
@@ -131,8 +138,9 @@ int main(int argc, char* argv[])
             
             sem_wait(tomato_saladmaker);
             printf("tomato sleeped for %d\n", cooking_time);
+            (*tomato_salads)++;
             (*sum_of_salads)++;
-            printf("tomato: salads made %d\n", *sum_of_salads);
+            //printf("tomato: salads made %d\n", *sum_of_salads);
             sem_post(chef);
         }
 
@@ -146,7 +154,7 @@ int main(int argc, char* argv[])
                 veggie_table[TOMATO]--;
                 veggie_table[ONION]--;
                 (*nof_salads)--;
-                printf("PEPPER: start salad %d\n", *sum_of_salads);
+                printf("PEPPER: start salad\n");
             }
             else
             {
@@ -166,8 +174,9 @@ int main(int argc, char* argv[])
             
             sem_wait(pepper_saladmaker);
             printf("pepper sleeped for %d\n", cooking_time);
+            (*pepper_salads)++;
             (*sum_of_salads)++;
-            printf("pepper: salads made %d\n", *sum_of_salads);
+            //printf("pepper: salads made %d\n", *sum_of_salads);
             sem_post(chef);
         }
 
