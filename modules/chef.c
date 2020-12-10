@@ -11,6 +11,7 @@
 #include <time.h>
 #include <errno.h>
 #include <sys/time.h>  /* times() */
+#include "writing_data.h"
 
 #define SEGMENTSIZE (6*sizeof(int) + 4*sizeof(sem_t))
 #define SEGMENTPERM 0666
@@ -19,11 +20,10 @@ enum{TOMATO, PEPPER, ONION};
 
 int main(int argc, char* argv[])
 {
-	FILE* file;
-	int id,retval,index, previous = -1;
+	int id,pid,retval,index, previous = -1;
 	int* veggie_table, *flag1,*flag2,*flag3;
 	int* nof_salads, *sum_of_salads, *onion_salads, *tomato_salads, *pepper_salads;
-	int mantime,no_wait = 1;
+	int mantime,no_wait = 1,rest=0;
 	
 	struct timeval  now;
 	struct tm* local;
@@ -103,6 +103,8 @@ int main(int argc, char* argv[])
 	*tomato_salads = 0;
 	*pepper_salads = 0;
 
+	pid = getpid();
+
 	if( !(strcmp(argv[1], "-n")) )
 	{
 		*nof_salads = atoi(argv[2]);
@@ -115,24 +117,23 @@ int main(int argc, char* argv[])
 	}
 
 	*sum_of_salads = 0;
-
+	*flag1 = 1;
+	*flag2 = 1;
+	*flag3 = 1;
 	
 	while(1)
 	{
 		sem_wait(chef);
+		if(!rest)
+		{
+			writing_data(now, local, "Chef", pid, "Man time for resting");
+			sleep(mantime);
+		}
+
 		if((*nof_salads) != 0)
 		{
-			file = fopen("log_file.txt", "a+");
-			if(file == NULL)
-			{
-				perror("Opening file");
-				exit(2);
-			}
-			*flag1 = 1;
-			*flag2 = 1;
-			*flag3 = 1;
+			rest = 1;
 			index = rand()%3;
-			
 			while(index == previous)
 			{
 				index = rand()%3;
@@ -143,46 +144,19 @@ int main(int argc, char* argv[])
 			case 0:
 				veggie_table[TOMATO] += 1;
 				veggie_table[PEPPER] += 1;
-				gettimeofday(&now, NULL);
-				local = localtime(&now.tv_sec);
-				fprintf(file, "%s", "[");
-  				fprintf(file,"%02d:", local->tm_hour);
-				fprintf(file, "%02d:", local->tm_min);
-				fprintf(file, "%02d:", local->tm_sec);
-				fprintf(file, "%03ld",now.tv_usec / 1000);
-				fprintf(file, "%s", "] [Chef] ");
-				fprintf(file, "%s", "[chef calling onion]\n");
-				fclose(file);
+				writing_data(now, local, "Chef", pid, "Selecting tomato and pepper");
 				sem_post(onion_saladmaker);
 				break;
 			case 1:
 				veggie_table[PEPPER] += 1;
 				veggie_table[ONION] += 1;
-				gettimeofday(&now, NULL);
-				local = localtime(&now.tv_sec);
-				fprintf(file, "%s", "[");
-  				fprintf(file,"%02d:", local->tm_hour);
-				fprintf(file, "%02d:", local->tm_min);
-				fprintf(file, "%02d:", local->tm_sec);
-				fprintf(file, "%03ld",now.tv_usec / 1000);
-				fprintf(file, "%s", "] [Chef] ");
-				fprintf(file, "%s", "[chef calling tomato]\n");
-				fclose(file);
+				writing_data(now, local, "Chef", pid, "Selecting onion and pepper");
 				sem_post(tomato_saladmaker);
 				break;
 			case 2:
 				veggie_table[TOMATO] += 1;
 				veggie_table[ONION] += 1;
-				gettimeofday(&now, NULL);
-				local = localtime(&now.tv_sec);
-				fprintf(file, "%s", "[");
-  				fprintf(file,"%02d:", local->tm_hour);
-				fprintf(file, "%02d:", local->tm_min);
-				fprintf(file, "%02d:", local->tm_sec);
-				fprintf(file, "%03ld",now.tv_usec / 1000);
-				fprintf(file, "%s", "] [Chef] ");
-				fprintf(file, "%s", "[calling pepper]\n");
-				fclose(file);
+				writing_data(now, local, "Chef", pid, "Selecting tomato and onion");
 				sem_post(pepper_saladmaker);
 				break;
 			default:
@@ -193,23 +167,7 @@ int main(int argc, char* argv[])
 		{
 			break;
 		}
-		file = fopen("log_file.txt", "a+");
-		if(file == NULL)
-		{
-			perror("Opening file");
-			exit(2);
-		}
-		gettimeofday(&now, NULL);
-		local = localtime(&now.tv_sec);
-		fprintf(file, "%s", "[");
-		fprintf(file,"%02d:", local->tm_hour);
-		fprintf(file, "%02d:", local->tm_min);
-		fprintf(file, "%02d:", local->tm_sec);
-		fprintf(file, "%03ld",now.tv_usec / 1000);
-		fprintf(file, "%s", "] [Chef] ");
-		fprintf(file, "%s", "[is resting]\n");
-		fclose(file);
-		sleep(mantime);
+		
 	}
 
 	while(1)
@@ -255,5 +213,4 @@ int main(int argc, char* argv[])
 	perror("semctl");
 	exit(1);
 	}
-	//fclose(file);
 }
