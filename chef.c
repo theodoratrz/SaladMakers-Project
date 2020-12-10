@@ -10,6 +10,7 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <errno.h>
+#include <sys/time.h>  /* times() */
 
 #define SEGMENTSIZE (6*sizeof(int) + 4*sizeof(sem_t))
 #define SEGMENTPERM 0666
@@ -18,10 +19,17 @@ enum{TOMATO, PEPPER, ONION};
 
 int main(int argc, char* argv[])
 {
+	FILE* file;
 	int id,retval,index, previous = -1;
 	int* veggie_table, *flag1,*flag2,*flag3;
 	int* nof_salads, *sum_of_salads, *onion_salads, *tomato_salads, *pepper_salads;
 	int mantime,no_wait = 1;
+	
+	struct timeval  now;
+	struct tm* local;
+
+	gettimeofday(&now, NULL);
+	local = localtime(&now.tv_sec);
 
 	key_t key = ftok(".", 2);
     sem_t *chef;
@@ -95,7 +103,6 @@ int main(int argc, char* argv[])
 	*tomato_salads = 0;
 	*pepper_salads = 0;
 
-	//*nof_salads = 15;
 	if( !(strcmp(argv[1], "-n")) )
 	{
 		*nof_salads = atoi(argv[2]);
@@ -108,12 +115,19 @@ int main(int argc, char* argv[])
 	}
 
 	*sum_of_salads = 0;
+
+	
 	while(1)
 	{
 		sem_wait(chef);
-
 		if((*nof_salads) != 0)
 		{
+			file = fopen("log_file.txt", "a+");
+			if(file == NULL)
+			{
+				perror("Opening file");
+				exit(2);
+			}
 			*flag1 = 1;
 			*flag2 = 1;
 			*flag3 = 1;
@@ -129,22 +143,46 @@ int main(int argc, char* argv[])
 			case 0:
 				veggie_table[TOMATO] += 1;
 				veggie_table[PEPPER] += 1;
-				//printf("chef: salad left %d\n",*nof_salads);
-				printf("chef calling onion\n");
+				gettimeofday(&now, NULL);
+				local = localtime(&now.tv_sec);
+				fprintf(file, "%s", "[");
+  				fprintf(file,"%02d:", local->tm_hour);
+				fprintf(file, "%02d:", local->tm_min);
+				fprintf(file, "%02d:", local->tm_sec);
+				fprintf(file, "%03ld",now.tv_usec / 1000);
+				fprintf(file, "%s", "] [Chef] ");
+				fprintf(file, "%s", "[chef calling onion]\n");
+				fclose(file);
 				sem_post(onion_saladmaker);
 				break;
 			case 1:
 				veggie_table[PEPPER] += 1;
 				veggie_table[ONION] += 1;
-				//printf("chef: salad left %d\n",*nof_salads);
-				printf("chef calling tomato\n");
+				gettimeofday(&now, NULL);
+				local = localtime(&now.tv_sec);
+				fprintf(file, "%s", "[");
+  				fprintf(file,"%02d:", local->tm_hour);
+				fprintf(file, "%02d:", local->tm_min);
+				fprintf(file, "%02d:", local->tm_sec);
+				fprintf(file, "%03ld",now.tv_usec / 1000);
+				fprintf(file, "%s", "] [Chef] ");
+				fprintf(file, "%s", "[chef calling tomato]\n");
+				fclose(file);
 				sem_post(tomato_saladmaker);
 				break;
 			case 2:
 				veggie_table[TOMATO] += 1;
 				veggie_table[ONION] += 1;
-				//printf("chef: salad left %d\n",*nof_salads);
-				printf("chef calling pepper\n");
+				gettimeofday(&now, NULL);
+				local = localtime(&now.tv_sec);
+				fprintf(file, "%s", "[");
+  				fprintf(file,"%02d:", local->tm_hour);
+				fprintf(file, "%02d:", local->tm_min);
+				fprintf(file, "%02d:", local->tm_sec);
+				fprintf(file, "%03ld",now.tv_usec / 1000);
+				fprintf(file, "%s", "] [Chef] ");
+				fprintf(file, "%s", "[calling pepper]\n");
+				fclose(file);
 				sem_post(pepper_saladmaker);
 				break;
 			default:
@@ -155,8 +193,23 @@ int main(int argc, char* argv[])
 		{
 			break;
 		}
+		file = fopen("log_file.txt", "a+");
+		if(file == NULL)
+		{
+			perror("Opening file");
+			exit(2);
+		}
+		gettimeofday(&now, NULL);
+		local = localtime(&now.tv_sec);
+		fprintf(file, "%s", "[");
+		fprintf(file,"%02d:", local->tm_hour);
+		fprintf(file, "%02d:", local->tm_min);
+		fprintf(file, "%02d:", local->tm_sec);
+		fprintf(file, "%03ld",now.tv_usec / 1000);
+		fprintf(file, "%s", "] [Chef] ");
+		fprintf(file, "%s", "[is resting]\n");
+		fclose(file);
 		sleep(mantime);
-		printf("sleeped for %d\n", mantime);
 	}
 
 	while(1)
@@ -189,6 +242,7 @@ int main(int argc, char* argv[])
 		
 	}
 
+	
 	printf("sum of salads: %d\n", *sum_of_salads);
 	printf("onion made: %d salad(s), tomato made: %d salad(s), pepper made: %d salad(s)\n", *onion_salads, *tomato_salads, *pepper_salads);
 	if (shmdt((void *)chef) == -1) 
@@ -201,4 +255,5 @@ int main(int argc, char* argv[])
 	perror("semctl");
 	exit(1);
 	}
+	//fclose(file);
 }

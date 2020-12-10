@@ -9,17 +9,25 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
+#include <sys/time.h>
+
 
 enum{TOMATO, PEPPER, ONION};
 
 int main(int argc, char* argv[])
 {
+    FILE* file;
     sem_t *chef;
 
 	int* veggie_table;
 	int* nof_salads,*onion_salads, *tomato_salads, *pepper_salads;
     int low_bound, upp_bound,key,cooking_time;
     char ingredient;
+    struct timeval  now;
+	struct tm* local;
+
+	gettimeofday(&now, NULL);
+	local = localtime(&now.tv_sec);
 
     sem_t *onion_saladmaker;
 
@@ -49,7 +57,6 @@ int main(int argc, char* argv[])
     srand(time(NULL));
     cooking_time = (rand() % (upp_bound - low_bound +1)) + low_bound;
     
-    //int key = atoi(argv[1]);
     int *flag1,*flag2,*flag3,*sum_of_salads;
 
     chef = (sem_t*) shmat(key, (void*)0,0);
@@ -72,23 +79,33 @@ int main(int argc, char* argv[])
     *onion_salads = 0;
 	*tomato_salads = 0;
 	*pepper_salads = 0;
+
     switch (ingredient)
     {
     case 'o':
         while(1)
         {
             sem_wait(onion_saladmaker);
+            file = fopen("log_file.txt", "a+");
+            if(file == NULL)
+            {
+                perror("Opening file");
+                exit(2);
+            }
+            fprintf(file, "%s", "Onion is waiting for the ingredients\n");
             if((*nof_salads) != 0)
             {
+                fprintf(file, "%s", "Onion took the ingredients\n");
                 veggie_table[TOMATO]--;
                 veggie_table[PEPPER]--;
                 (*nof_salads)--;
-                printf("ONION: start salad\n");
+                fprintf(file, "%s", "Onion starts cooking salad\n");
             }
             else
             {
                 *flag1 = 0;
                 sem_post(chef);
+                fprintf(file, "%s", "Onion is finished\n");
                 if (shmdt((void *)chef) == -1) 
                 {  /* shared memory detach */
                     perror("Failed to destroy shared memory segment");
@@ -96,15 +113,23 @@ int main(int argc, char* argv[])
                 }
                 return 0;
             }
+            fclose(file);
             sem_post(chef);
 
             sleep(cooking_time);
 
             sem_wait(onion_saladmaker);
-            printf("onion sleeped for %d\n", cooking_time);
+            file = fopen("log_file.txt", "a+");
+            if(file == NULL)
+            {
+                perror("Opening file");
+                exit(2);
+            }
+            fprintf(file, "%s", "Onion is cooking\n");
             (*onion_salads)++;
             (*sum_of_salads)++;
-            //printf("onion: salads made %d\n", *sum_of_salads);
+            fprintf(file, "%s", "Onion finished the salad\n");
+            fclose(file);
             sem_post(chef);
         }
 
@@ -113,17 +138,26 @@ int main(int argc, char* argv[])
         while(1)
         {
             sem_wait(tomato_saladmaker);
+            file = fopen("log_file.txt", "a+");
+            if(file == NULL)
+            {
+                perror("Opening file");
+                exit(2);
+            }
+            fprintf(file, "%s", "Tomato is waiting for the ingredients\n");
             if((*nof_salads) != 0)
             {
+                fprintf(file, "%s", "Pepper took the ingredients\n");
                 veggie_table[ONION]--;
                 veggie_table[PEPPER]--;
                 (*nof_salads)--;
-                printf("TOMATO: start salad\n");
+                fprintf(file, "%s", "Tomato starts cooking salad\n");
             }
             else
             {
                 *flag2 = 0;
                 sem_post(chef);
+                fprintf(file, "%s", "Tomato is finished\n");
                 if (shmdt((void *)chef) == -1) 
                 {  /* shared memory detach */
                     perror("Failed to destroy shared memory segment");
@@ -131,16 +165,23 @@ int main(int argc, char* argv[])
                 }
                 return 0;
             }
-            
+            fclose(file);
             sem_post(chef);
 
             sleep(cooking_time);
             
             sem_wait(tomato_saladmaker);
-            printf("tomato sleeped for %d\n", cooking_time);
+            file = fopen("log_file.txt", "a+");
+            if(file == NULL)
+            {
+                perror("Opening file");
+                exit(2);
+            }
+            fprintf(file, "%s", "Tomato is cooking\n");
             (*tomato_salads)++;
             (*sum_of_salads)++;
-            //printf("tomato: salads made %d\n", *sum_of_salads);
+            fprintf(file, "%s", "Tomato finished the salad\n");
+            fclose(file);
             sem_post(chef);
         }
 
@@ -149,17 +190,26 @@ int main(int argc, char* argv[])
         while(1)
         {
             sem_wait(pepper_saladmaker);
+            file = fopen("log_file.txt", "a+");
+            if(file == NULL)
+            {
+                perror("Opening file");
+                exit(2);
+            }
+            fprintf(file, "%s", "Pepper is waiting for the ingredients\n");
             if((*nof_salads) != 0)
             {
+                fprintf(file, "%s", "Pepper took the ingredients\n");
                 veggie_table[TOMATO]--;
                 veggie_table[ONION]--;
                 (*nof_salads)--;
-                printf("PEPPER: start salad\n");
+                fprintf(file, "%s", "Pepper starts cooking salad\n");
             }
             else
             {
                 *flag3 = 0;
                 sem_post(chef);
+                fprintf(file, "%s", "Pepper is finished\n");
                 if (shmdt((void *)chef) == -1) 
                 {  /* shared memory detach */
                     perror("Failed to destroy shared memory segment");
@@ -167,16 +217,23 @@ int main(int argc, char* argv[])
                 }
                 return 0;
             }
-            
+            fclose(file);
             sem_post(chef);
 
             sleep(cooking_time);
             
             sem_wait(pepper_saladmaker);
-            printf("pepper sleeped for %d\n", cooking_time);
+            file = fopen("log_file.txt", "a+");
+            if(file == NULL)
+            {
+                perror("Opening file");
+                exit(2);
+            }
+            fprintf(file, "%s", "Pepper is cooking\n");
             (*pepper_salads)++;
             (*sum_of_salads)++;
-            //printf("pepper: salads made %d\n", *sum_of_salads);
+            fprintf(file, "%s", "Pepper finished the salad\n");
+            fclose(file);
             sem_post(chef);
         }
 
@@ -184,5 +241,4 @@ int main(int argc, char* argv[])
     default:
         break;
     }
-    
 }
