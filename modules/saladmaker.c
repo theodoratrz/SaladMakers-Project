@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
     sem_t *chef;
 
 	int* veggie_table;
-	int* nof_salads,*onion_salads, *tomato_salads, *pepper_salads;
+	int* nof_salads,*onion_salads, *tomato_salads, *pepper_salads,*sm1_pid, *sm2_pid, *sm3_pid;
     int low_bound, upp_bound,key,cooking_time, pid;
     char ingredient;
     struct timeval  now;
@@ -74,6 +74,9 @@ int main(int argc, char* argv[])
     onion_salads = sum_of_salads+1;
 	tomato_salads = onion_salads+1;
 	pepper_salads = tomato_salads+1;
+    sm1_pid = pepper_salads+1;
+	sm2_pid = sm1_pid+1;
+	sm3_pid = sm2_pid+1;
 
     *onion_salads = 0;
 	*tomato_salads = 0;
@@ -86,6 +89,7 @@ int main(int argc, char* argv[])
         while(1)
         {
             sem_wait(onion_saladmaker);
+            *sm1_pid = pid;
             writing_data(now, local, "log_file.txt","Saladmaker1", pid, "Waiting for ingredients");
             writing_data(now, local, "log_file_sm1.txt","Saladmaker1", pid, "Waiting for ingredients");
             if((*nof_salads) != 0)
@@ -128,6 +132,7 @@ int main(int argc, char* argv[])
         while(1)
         {
             sem_wait(tomato_saladmaker);
+            *sm3_pid = pid;
             writing_data(now, local, "log_file.txt","Saladmaker3", pid, "Waiting for ingredients");
              writing_data(now, local, "log_file_sm3.txt","Saladmaker3", pid, "Waiting for ingredients");
             if((*nof_salads) != 0)
@@ -170,6 +175,7 @@ int main(int argc, char* argv[])
         while(1)
         {
             sem_wait(pepper_saladmaker);
+            *sm2_pid = pid;
             writing_data(now, local, "log_file.txt","Saladmaker2", pid, "Waiting for ingredients");
             writing_data(now, local, "log_file_sm2.txt","Saladmaker2", pid, "Waiting for ingredients");
             if((*nof_salads) != 0)

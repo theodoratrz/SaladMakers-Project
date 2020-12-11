@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
 	FILE* file;
 	int id,pid,retval,index, previous = -1;
 	int* veggie_table, *flag1,*flag2,*flag3;
-	int* nof_salads, *sum_of_salads, *onion_salads, *tomato_salads, *pepper_salads;
+	int* nof_salads, *sum_of_salads, *onion_salads, *tomato_salads, *pepper_salads, *sm1_pid,*sm2_pid,*sm3_pid;
 	int mantime,no_wait = 1,rest=0;
 	
 	struct timeval  now;
@@ -65,6 +65,9 @@ int main(int argc, char* argv[])
 	onion_salads = sum_of_salads+1;
 	tomato_salads = onion_salads+1;
 	pepper_salads = tomato_salads+1;
+	sm1_pid = pepper_salads+1;
+	sm2_pid = sm1_pid+1;
+	sm3_pid = sm2_pid+1;
 
     /* Initialize the semaphore. */
 	retval = sem_init(chef,1,1);
@@ -205,9 +208,9 @@ int main(int argc, char* argv[])
 	}
 
 	printf("Total #salads [ %d ]\n", *sum_of_salads);
-	printf("salads of salad_maker1 [pid] : [ %d ]\n",*onion_salads);
-	printf("salads of salad_maker2 [pid] : [ %d ]\n",*pepper_salads);
-	printf("salads of salad_maker3 [pid] : [ %d ]\n",*tomato_salads);
+	printf("salads of salad_maker1 [%d] : [ %d ]\n",*sm1_pid, *onion_salads);
+	printf("salads of salad_maker2 [%d] : [ %d ]\n",*sm2_pid,*pepper_salads);
+	printf("salads of salad_maker3 [%d] : [ %d ]\n",*sm3_pid,*tomato_salads);
 	
 	if (shmdt((void *)chef) == -1) 
 	{   //shared memory detach
