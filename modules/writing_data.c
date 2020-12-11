@@ -1,9 +1,9 @@
 #include "writing_data.h"
 
-void writing_data(struct timeval  now, struct tm* local, char* name, int pid, char* phrase)
+void writing_data(struct timeval  now, struct tm* local, char* file_name, char* name, int pid, char* phrase)
 {
     FILE* file;
-    file = fopen("log_file.txt", "a+");
+    file = fopen(file_name, "a+");
     if(file == NULL)
     {
         perror("Opening file");

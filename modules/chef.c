@@ -20,6 +20,7 @@ enum{TOMATO, PEPPER, ONION};
 
 int main(int argc, char* argv[])
 {
+	FILE* file;
 	int id,pid,retval,index, previous = -1;
 	int* veggie_table, *flag1,*flag2,*flag3;
 	int* nof_salads, *sum_of_salads, *onion_salads, *tomato_salads, *pepper_salads;
@@ -126,7 +127,7 @@ int main(int argc, char* argv[])
 		sem_wait(chef);
 		if(!rest)
 		{
-			writing_data(now, local, "Chef", pid, "Man time for resting");
+			writing_data(now, local,"log_file.txt", "Chef", pid, "Man time for resting");
 			sleep(mantime);
 		}
 
@@ -142,21 +143,24 @@ int main(int argc, char* argv[])
 			switch (index)
 			{
 			case 0:
+				writing_data(now, local,"log_file.txt", "Chef", pid, "Selecting tomato and pepper");
 				veggie_table[TOMATO] += 1;
 				veggie_table[PEPPER] += 1;
-				writing_data(now, local, "Chef", pid, "Selecting tomato and pepper");
+				writing_data(now, local,"log_file.txt", "Chef", pid, "Notify Saladmaker1");
 				sem_post(onion_saladmaker);
 				break;
 			case 1:
+				writing_data(now, local, "log_file.txt","Chef", pid, "Selecting onion and pepper");
 				veggie_table[PEPPER] += 1;
 				veggie_table[ONION] += 1;
-				writing_data(now, local, "Chef", pid, "Selecting onion and pepper");
+				writing_data(now, local, "log_file.txt","Chef", pid, "Notify Saladmaker3");
 				sem_post(tomato_saladmaker);
 				break;
 			case 2:
+				writing_data(now, local,"log_file.txt", "Chef", pid, "Selecting tomato and onion");
 				veggie_table[TOMATO] += 1;
 				veggie_table[ONION] += 1;
-				writing_data(now, local, "Chef", pid, "Selecting tomato and onion");
+				writing_data(now, local,"log_file.txt", "Chef", pid, "Notify Saladmaker2");
 				sem_post(pepper_saladmaker);
 				break;
 			default:
@@ -200,9 +204,11 @@ int main(int argc, char* argv[])
 		
 	}
 
+	printf("Total #salads [ %d ]\n", *sum_of_salads);
+	printf("salads of salad_maker1 [pid] : [ %d ]\n",*onion_salads);
+	printf("salads of salad_maker2 [pid] : [ %d ]\n",*pepper_salads);
+	printf("salads of salad_maker3 [pid] : [ %d ]\n",*tomato_salads);
 	
-	printf("sum of salads: %d\n", *sum_of_salads);
-	printf("onion made: %d salad(s), tomato made: %d salad(s), pepper made: %d salad(s)\n", *onion_salads, *tomato_salads, *pepper_salads);
 	if (shmdt((void *)chef) == -1) 
 	{   //shared memory detach
 		perror("Failed to destroy shared memory segment");
@@ -213,4 +219,7 @@ int main(int argc, char* argv[])
 	perror("semctl");
 	exit(1);
 	}
+
+	printf("Time intervals: (in increasing order)\n");
+	
 }

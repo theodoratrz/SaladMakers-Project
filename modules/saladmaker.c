@@ -12,7 +12,6 @@
 #include <sys/time.h>
 #include "writing_data.h"
 
-
 enum{TOMATO, PEPPER, ONION};
 
 int main(int argc, char* argv[])
@@ -87,21 +86,24 @@ int main(int argc, char* argv[])
         while(1)
         {
             sem_wait(onion_saladmaker);
-            writing_data(now, local, "Saladmaker1", pid, "Waiting for ingredients");
-            
+            writing_data(now, local, "log_file.txt","Saladmaker1", pid, "Waiting for ingredients");
+            writing_data(now, local, "log_file_sm1.txt","Saladmaker1", pid, "Waiting for ingredients");
             if((*nof_salads) != 0)
             {
-                writing_data(now, local, "Saladmaker1", pid, "Get ingredients");
+                writing_data(now, local,"log_file.txt", "Saladmaker1", pid, "Get ingredients");
+                writing_data(now, local,"log_file_sm1.txt", "Saladmaker1", pid, "Get ingredients");
                 veggie_table[TOMATO]--;
                 veggie_table[PEPPER]--;
                 (*nof_salads)--;
-                writing_data(now, local, "Saladmaker1", pid, "Start making salad");
+                writing_data(now, local, "log_file.txt","Saladmaker1", pid, "Start making salad");
+                writing_data(now, local, "log_file_sm1.txt","Saladmaker1", pid, "Start making salad");
             }
             else
             {
                 *flag1 = 0;
                 sem_post(chef);
-                writing_data(now, local, "Saladmaker1", pid, "finished");
+                writing_data(now, local,"log_file.txt", "Saladmaker1", pid, "finished");
+                writing_data(now, local,"log_file_sm1.txt", "Saladmaker1", pid, "finished");
                 if (shmdt((void *)chef) == -1) 
                 {  /* shared memory detach */
                     perror("Failed to destroy shared memory segment");
@@ -116,7 +118,8 @@ int main(int argc, char* argv[])
             sem_wait(onion_saladmaker);
             (*onion_salads)++;
             (*sum_of_salads)++;
-            writing_data(now, local, "Saladmaker1", pid, "End making salad");
+            writing_data(now, local,"log_file.txt", "Saladmaker1", pid, "End making salad");
+            writing_data(now, local,"log_file_sm1.txt", "Saladmaker1", pid, "End making salad");
             sem_post(chef);
         }
 
@@ -125,20 +128,24 @@ int main(int argc, char* argv[])
         while(1)
         {
             sem_wait(tomato_saladmaker);
-            writing_data(now, local, "Saladmaker3", pid, "Waiting for ingredients");
+            writing_data(now, local, "log_file.txt","Saladmaker3", pid, "Waiting for ingredients");
+             writing_data(now, local, "log_file_sm3.txt","Saladmaker3", pid, "Waiting for ingredients");
             if((*nof_salads) != 0)
             {
-                writing_data(now, local, "Saladmaker3", pid, "Get ingredients");
+                writing_data(now, local,"log_file.txt", "Saladmaker3", pid, "Get ingredients");
+                writing_data(now, local,"log_file_sm3.txt", "Saladmaker3", pid, "Get ingredients");
                 veggie_table[ONION]--;
                 veggie_table[PEPPER]--;
                 (*nof_salads)--;
-                writing_data(now, local, "Saladmaker3", pid, "Start making salad");
+                writing_data(now, local,"log_file.txt", "Saladmaker3", pid, "Start making salad");
+                writing_data(now, local,"log_file_sm3.txt", "Saladmaker3", pid, "Start making salad");
             }
             else
             {
                 *flag2 = 0;
                 sem_post(chef);
-                writing_data(now, local, "Saladmaker3", pid, "finished");
+                writing_data(now, local, "log_file.txt","Saladmaker3", pid, "finished");
+                writing_data(now, local, "log_file_sm3.txt","Saladmaker3", pid, "finished");
                 if (shmdt((void *)chef) == -1) 
                 {  /* shared memory detach */
                     perror("Failed to destroy shared memory segment");
@@ -153,7 +160,8 @@ int main(int argc, char* argv[])
             sem_wait(tomato_saladmaker);
             (*tomato_salads)++;
             (*sum_of_salads)++;
-            writing_data(now, local, "Saladmaker3", pid, "End making salad");
+            writing_data(now, local, "log_file.txt","Saladmaker3", pid, "End making salad");
+            writing_data(now, local, "log_file_sm3.txt","Saladmaker3", pid, "End making salad");
             sem_post(chef);
         }
 
@@ -162,20 +170,24 @@ int main(int argc, char* argv[])
         while(1)
         {
             sem_wait(pepper_saladmaker);
-            writing_data(now, local, "Saladmaker2", pid, "Waiting for ingredients");
+            writing_data(now, local, "log_file.txt","Saladmaker2", pid, "Waiting for ingredients");
+            writing_data(now, local, "log_file_sm2.txt","Saladmaker2", pid, "Waiting for ingredients");
             if((*nof_salads) != 0)
             {
-                writing_data(now, local, "Saladmaker2", pid, "Get ingredients");
+                writing_data(now, local,"log_file.txt", "Saladmaker2", pid, "Get ingredients");
+                writing_data(now, local,"log_file_sm2.txt", "Saladmaker2", pid, "Get ingredients");
                 veggie_table[TOMATO]--;
                 veggie_table[ONION]--;
                 (*nof_salads)--;
-                writing_data(now, local, "Saladmaker2", pid, "Start making salad");
+                writing_data(now, local,"log_file.txt", "Saladmaker2", pid, "Start making salad");
+                writing_data(now, local,"log_file_sm2.txt", "Saladmaker2", pid, "Start making salad");
             }
             else
             {
                 *flag3 = 0;
                 sem_post(chef);
-                writing_data(now, local, "Saladmaker2", pid, "finished");
+                writing_data(now, local,"log_file.txt", "Saladmaker2", pid, "finished");
+                writing_data(now, local,"log_file_sm2.txt", "Saladmaker2", pid, "finished");
                 if (shmdt((void *)chef) == -1) 
                 {  /* shared memory detach */
                     perror("Failed to destroy shared memory segment");
@@ -190,7 +202,8 @@ int main(int argc, char* argv[])
             sem_wait(pepper_saladmaker);
             (*pepper_salads)++;
             (*sum_of_salads)++;
-            writing_data(now, local, "Saladmaker2", pid, "End making salad");
+            writing_data(now, local,"log_file.txt", "Saladmaker2", pid, "End making salad");
+            writing_data(now, local,"log_file_sm2.txt", "Saladmaker2", pid, "End making salad");
             sem_post(chef);
         }
 

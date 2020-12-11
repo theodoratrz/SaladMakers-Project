@@ -4,4 +4,4 @@
 #include <string.h>
 #include <stdlib.h>
 
-void writing_data(struct timeval  now, struct tm* local, char* name, int pid, char* phrase);
+void writing_data(struct timeval  now, struct tm* local, char* file_name, char* name, int pid, char* phrase);
