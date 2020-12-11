@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <sys/time.h>  /* times() */
 #include "writing_data.h"
+#include "reading_data.h"
 
 #define SEGMENTSIZE (6*sizeof(int) + 4*sizeof(sem_t))
 #define SEGMENTPERM 0666
@@ -224,5 +225,6 @@ int main(int argc, char* argv[])
 	}
 
 	printf("Time intervals: (in increasing order)\n");
+	reading_data();
 	
 }
