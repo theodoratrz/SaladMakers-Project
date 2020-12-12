@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-void reading_data()
+int main()
 {
     FILE* file;
     int nof_processes=0,flag=0, chef=0, sm1=0,sm2=0,sm3=0;
@@ -32,40 +32,27 @@ void reading_data()
             break;
         }
 
-        //fscanf(file, "%[^\n]", c);
         fscanf(file, "%[^]]", times);
-        //printf("%s", times);
         fscanf(file, "%c",&ch);
-        //printf("%c",ch);
         fscanf(file, "%c",&ch);
-        //printf("%c",ch);
 
         fscanf(file, "%[^]]", pid);
-        //printf("%s", pid);
         fscanf(file, "%c",&ch);
-        //printf("%c",ch);
         fscanf(file, "%c",&ch);
-        //printf("%c",ch);
 
         fscanf(file, "%[^]]", name);
-        //printf("%s", name);
         fscanf(file, "%c",&ch);
-        //printf("%c",ch);
         fscanf(file, "%c",&ch);
-        //printf("%c",ch);
 
         fscanf(file, "%[^]]", phrase);
-        //printf("%s\n", phrase);
         fscanf(file, "%c",&ch);
-       // printf("%c",ch);
         fscanf(file, "%c",&ch);
-        //printf("%c",ch);
 
         if(!strcmp(phrase, "[Start making salad"))
         {
             if(nof_processes == 0)
             {
-                flag = 1;
+                //flag = 1;
                 strcpy(start_time, times);
                 strcpy(start_name, name);
                 if( (!strcmp(name, "[Saladmaker1")) && (sm1 == 0))
@@ -81,27 +68,40 @@ void reading_data()
                     sm3 = 1;
                 }
                 nof_processes++;
-                //printf("#process: %s\n", name);
             }
             else
             {
                 if( (!strcmp(name, "[Saladmaker1")) && (sm1 == 0))
                 {
+                    if(!flag)
+                    {
+                        strcpy(start_time, times);
+                        flag = 1;
+                    }
                     sm1 = 1;
                     nof_processes++;
                 }
                 else if((!strcmp(name, "[Saladmaker2")) && (sm2 == 0))
                 {
+                    if(!flag)
+                    {
+                        strcpy(start_time, times);
+                        flag = 1;
+                    }
                     sm2 = 1;
                     nof_processes++;
                 }
                 else if((!strcmp(name, "[Saladmaker3")) && (sm3 == 0))
                 {
+                    if(!flag)
+                    {
+                        strcpy(start_time, times);
+                        flag = 1;
+                    }
                     sm3 = 1;
                     nof_processes++;
                 }
                 
-                //printf("!process: %s\n", name);
             }
             
             
@@ -119,7 +119,7 @@ void reading_data()
                 nof_processes = 0;
             }
         }
-        else
+        /*else
         {
             if(flag)
             {
@@ -127,28 +127,24 @@ void reading_data()
                 {
                     sm1 = 1;
                     nof_processes++;
-                    //printf("@process: %s\n", name);
                 }
                 else if((!strcmp(name, "[Saladmaker2")) && (sm2 == 0))
                 {
                     sm2 = 1;
                     nof_processes++;
-                    //printf("$process: %s\n", name);
                 }
                 else if((!strcmp(name, "[Saladmaker3")) && (sm3 == 0))
                 {
                     sm3 = 1;
                     nof_processes++;
-                    //printf("^process: %s\n", name);
                 }
                 else if((!strcmp(name, "[Chef")) && (chef == 0))
                 {
                     chef = 1;
                     nof_processes++;
-                    //printf("&process: %s\n", name);
                 }
             }
-        }
+        }*/
         
     }
     
