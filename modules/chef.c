@@ -21,7 +21,6 @@ enum{TOMATO, PEPPER, ONION};
 
 int main(int argc, char* argv[])
 {
-	FILE* file;
 	int id,pid,retval,index, previous = -1;
 	int* veggie_table, *flag1,*flag2,*flag3;
 	int* nof_salads, *sum_of_salads, *onion_salads, *tomato_salads, *pepper_salads, *sm1_pid,*sm2_pid,*sm3_pid;
