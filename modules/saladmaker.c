@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 
 	sem_t *tomato_saladmaker;
 
-    for(int i = 1; i < argc; i+=2 )
+    for(int i = 1; i < argc; i+=2 )             // flags may be given in any order
     {
         if(!(strcmp(argv[i], "-t1")))
         {
@@ -48,16 +48,18 @@ int main(int argc, char* argv[])
         {
             key = atoi(argv[i+1]);
         }
-        else if(!(strcmp(argv[i], "-i")))
-        {
-            ingredient = *(argv[i+1]);
+        else if(!(strcmp(argv[i], "-i")))       // the user calls the same excecutable of saladmaker
+        {                                       // and gives as argument which saladmaker is
+            ingredient = *(argv[i+1]);          // by giving the standard ingredient of each saladmaker
         }
     }
     srand(time(NULL));
+    // compute the random cooking time for each saladmaker, depending on low and upper bounds
     cooking_time = (rand() % (upp_bound - low_bound +1)) + low_bound;
     
     int *flag1,*flag2,*flag3,*sum_of_salads;
 
+    // Attach the segment
     chef = (sem_t*) shmat(key, (void*)0,0);
 	if ( chef == (void *) -1) { perror("Attachment."); exit(2);}
 	onion_saladmaker = chef+1;
@@ -81,38 +83,39 @@ int main(int argc, char* argv[])
     *onion_salads = 0;
 	*tomato_salads = 0;
 	*pepper_salads = 0;
-    pid = getpid();
+    pid = getpid();                             // each saladmaker's pid
 
     switch (ingredient)
     {
-    case 'o':
+    case 'o':                                   // first saladmaker
         while(1)
         {
-            sem_wait(onion_saladmaker);
-            *sm1_pid = pid;
+            sem_wait(onion_saladmaker);         // saladmaker 1 wants to enter its critical section
+            *sm1_pid = pid;                     // chef wants to know the pid of each saladmaker
             writing_data(now, local, "log_file.txt","Saladmaker1", pid, "Waiting for ingredients");
             writing_data(now, local, "log_file_sm1.txt","Saladmaker1", pid, "Waiting for ingredients");
-            if((*nof_salads) != 0)
+            if((*nof_salads) != 0)              // if there are salads to be made
             {
                 writing_data(now, local,"log_file.txt", "Saladmaker1", pid, "Get ingredients");
                 writing_data(now, local,"log_file_sm1.txt", "Saladmaker1", pid, "Get ingredients");
-                veggie_table[TOMATO]--;
+                veggie_table[TOMATO]--;         // saladmaker takes the ingredients from the table
                 veggie_table[PEPPER]--;
-                (*nof_salads)--;
+                (*nof_salads)--;                // update the number of salads left
                 writing_data(now, local, "log_file.txt","Saladmaker1", pid, "Start making salad");
                 writing_data(now, local, "log_file_sm1.txt","Saladmaker1", pid, "Start making salad");
             }
             else
-            {
-                *flag1 = 0;
-                sem_post(chef);
+            {                                   // if all salads have been made
+                *flag1 = 0;                     // set flag to 1
                 writing_data(now, local,"log_file.txt", "Saladmaker1", pid, "finished");
                 writing_data(now, local,"log_file_sm1.txt", "Saladmaker1", pid, "finished");
-                if (shmdt((void *)chef) == -1) 
+                sem_post(chef);                 // post chef's semaphore
+                if (shmdt((void *)chef) == -1)  // detach the segment
                 {  /* shared memory detach */
                     perror("Failed to destroy shared memory segment");
                     return 1;
                 }
+
                 return 0;
             }
             sem_post(chef);
@@ -131,7 +134,7 @@ int main(int argc, char* argv[])
     case 't':
         while(1)
         {
-            sem_wait(tomato_saladmaker);
+            sem_wait(tomato_saladmaker);        // saladmaker 3 wants to enter its critical section
             *sm3_pid = pid;
             writing_data(now, local, "log_file.txt","Saladmaker3", pid, "Waiting for ingredients");
              writing_data(now, local, "log_file_sm3.txt","Saladmaker3", pid, "Waiting for ingredients");
@@ -148,9 +151,9 @@ int main(int argc, char* argv[])
             else
             {
                 *flag2 = 0;
-                sem_post(chef);
                 writing_data(now, local, "log_file.txt","Saladmaker3", pid, "finished");
                 writing_data(now, local, "log_file_sm3.txt","Saladmaker3", pid, "finished");
+                sem_post(chef);
                 if (shmdt((void *)chef) == -1) 
                 {  /* shared memory detach */
                     perror("Failed to destroy shared memory segment");
@@ -174,7 +177,7 @@ int main(int argc, char* argv[])
     case 'p':
         while(1)
         {
-            sem_wait(pepper_saladmaker);
+            sem_wait(pepper_saladmaker);        // saladmaker 2 wants to enter its critical section
             *sm2_pid = pid;
             writing_data(now, local, "log_file.txt","Saladmaker2", pid, "Waiting for ingredients");
             writing_data(now, local, "log_file_sm2.txt","Saladmaker2", pid, "Waiting for ingredients");
@@ -191,9 +194,9 @@ int main(int argc, char* argv[])
             else
             {
                 *flag3 = 0;
-                sem_post(chef);
                 writing_data(now, local,"log_file.txt", "Saladmaker2", pid, "finished");
                 writing_data(now, local,"log_file_sm2.txt", "Saladmaker2", pid, "finished");
+                sem_post(chef);
                 if (shmdt((void *)chef) == -1) 
                 {  /* shared memory detach */
                     perror("Failed to destroy shared memory segment");

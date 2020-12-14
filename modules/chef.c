@@ -10,7 +10,7 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <errno.h>
-#include <sys/time.h>  /* times() */
+#include <sys/time.h>  
 #include "writing_data.h"
 #include "reading_data.h"
 
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 	struct timeval  now;
 	struct tm* local;
 
-	gettimeofday(&now, NULL);
+	gettimeofday(&now, NULL);			
 	local = localtime(&now.tv_sec);
 
 	key_t key = ftok(".", 2);
@@ -47,10 +47,12 @@ int main(int argc, char* argv[])
 	}
 	else printf("Allocated %d\n", id);
 
-	printf("id: %d\n", id);
-    /* Attach the segment. */
+	printf("id: %d\n", id);		// we want to know the id, so to pass it through tty to the other processes
+
+    // Attach the segment. 
 	chef = (sem_t*) shmat(id, (void*)0,0);
 	if ( chef == (void *) -1) { perror("Attachment."); exit(2);}
+
 	onion_saladmaker = chef+1;
 	pepper_saladmaker = chef+2;
 	tomato_saladmaker = chef+3;
@@ -69,28 +71,28 @@ int main(int argc, char* argv[])
 	sm2_pid = sm1_pid+1;
 	sm3_pid = sm2_pid+1;
 
-    /* Initialize the semaphore. */
-	retval = sem_init(chef,1,1);
+    // Initialize the semaphore. 
+	retval = sem_init(chef,1,1);				// We want chef to enter first the CS, in order to give the ingredients
+	if (retval != 0) {							// so we initialize its semaphore to 1
+		perror("Couldn't initialize.");
+		exit(3);
+	}
+
+    // Initialize the semaphore. 
+	retval = sem_init(onion_saladmaker,1,0);	// saladmakers semaphores are initialized to 0
 	if (retval != 0) {
 		perror("Couldn't initialize.");
 		exit(3);
 	}
 
-    /* Initialize the semaphore. */
-	retval = sem_init(onion_saladmaker,1,0);
-	if (retval != 0) {
-		perror("Couldn't initialize.");
-		exit(3);
-	}
-
-    /* Initialize the semaphore. */
+    // Initialize the semaphore. 
 	retval = sem_init(pepper_saladmaker,1,0);
 	if (retval != 0) {
 		perror("Couldn't initialize.");
 		exit(3);
 	}
 
-    /* Initialize the semaphore. */
+    // Initialize the semaphore.
 	retval = sem_init(tomato_saladmaker,1,0);
 	if (retval != 0) {
 		perror("Couldn't initialize.");
@@ -99,20 +101,20 @@ int main(int argc, char* argv[])
 
 	srand(time(NULL));
 
-	veggie_table[TOMATO] = 0;
-	veggie_table[PEPPER] = 0;
+	veggie_table[TOMATO] = 0;					// we use an array for the 3 ingredients
+	veggie_table[PEPPER] = 0;					// when it's set to 1 = this ingredient exists on the table
 	veggie_table[ONION] = 0;
 
-	*onion_salads = 0;
+	*onion_salads = 0;							// count how many salads each saladmaker makes
 	*tomato_salads = 0;
 	*pepper_salads = 0;
 
-	pid = getpid();
+	pid = getpid();								// chef's pid
 
-	if( !(strcmp(argv[1], "-n")) )
+	if( !(strcmp(argv[1], "-n")) )				// flags may be given in any order 
 	{
-		*nof_salads = atoi(argv[2]);
-		mantime = atoi(argv[4]);
+		*nof_salads = atoi(argv[2]);			// terminating counter(number of salads left)
+		mantime = atoi(argv[4]);				// "resting time"
 	}
 	else if( !(strcmp(argv[1], "-m")) )
 	{
@@ -120,51 +122,52 @@ int main(int argc, char* argv[])
 		*nof_salads = atoi(argv[4]);
 	}
 
-	*sum_of_salads = 0;
-	*flag1 = 1;
-	*flag2 = 1;
-	*flag3 = 1;
+	*sum_of_salads = 0;							// the final sum of salads
+	*flag1 = 1;									// flags that indicate when a saladmaker is active
+	*flag2 = 1;									// when nof==0 , saladmakers inform chef that they finished
+	*flag3 = 1;									// by setting flag = 0
 	
 	while(1)
 	{
-		sem_wait(chef);
-		if(!rest)
+		sem_wait(chef);							// chef enters critical section
+		if(!rest)								// rest is a flag that shows if chef has rested before or not
 		{
 			writing_data(now, local,"log_file.txt", "Chef", pid, "Man time for resting");
 			sleep(mantime);
 		}
 
-		if((*nof_salads) != 0)
+		if((*nof_salads) != 0)					// if there are salads-to be made-
 		{
-			rest = 1;
-			index = rand()%3;
-			while(index == previous)
+			rest = 1;							// after the first time chef enters CS , rest becomes 1
+			index = rand()%3;					// chef picks randomly 2 ingredients(a saladmaker)
+			while(index == previous)			// never pick the same 2 ingredients 2 times in a row
 			{
 				index = rand()%3;
 			}
 			previous = index;
+
 			switch (index)
 			{
-			case 0:
+			case 0:								// saladmaker 1
 				writing_data(now, local,"log_file.txt", "Chef", pid, "Selecting tomato and pepper");
-				veggie_table[TOMATO] += 1;
+				veggie_table[TOMATO] += 1;		// chef let the ingredients at the table
 				veggie_table[PEPPER] += 1;
 				writing_data(now, local,"log_file.txt", "Chef", pid, "Notify Saladmaker1");
-				sem_post(onion_saladmaker);
+				sem_post(onion_saladmaker);		// chef exits critical section, post saladmaker1's semaphore
 				break;
-			case 1:
+			case 1:								// saladmaker 3
 				writing_data(now, local, "log_file.txt","Chef", pid, "Selecting onion and pepper");
-				veggie_table[PEPPER] += 1;
+				veggie_table[PEPPER] += 1;		// chef let the ingredients at the table
 				veggie_table[ONION] += 1;
 				writing_data(now, local, "log_file.txt","Chef", pid, "Notify Saladmaker3");
-				sem_post(tomato_saladmaker);
+				sem_post(tomato_saladmaker);	// chef exits critical section, post saladmaker3's semaphore
 				break;
-			case 2:
+			case 2:								// saladmaker 3
 				writing_data(now, local,"log_file.txt", "Chef", pid, "Selecting tomato and onion");
-				veggie_table[TOMATO] += 1;
+				veggie_table[TOMATO] += 1;		// chef let the ingredients at the table
 				veggie_table[ONION] += 1;
 				writing_data(now, local,"log_file.txt", "Chef", pid, "Notify Saladmaker2");
-				sem_post(pepper_saladmaker);
+				sem_post(pepper_saladmaker);	// chef exits critical section, post saladmaker2's semaphore
 				break;
 			default:
 				break;
@@ -172,15 +175,15 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			break;
+			break;								// if all salads are ready, exit while
 		}
 		
 	}
 
 	while(1)
 	{
-		if(no_wait == 0)
-		{
+		if(no_wait == 0)						// chef must wait all saladmakers to finish
+		{										// this happens when saladmakers set their flags to 0
 			sem_wait(chef);
 		}
 		else
@@ -207,6 +210,8 @@ int main(int argc, char* argv[])
 		
 	}
 
+	// Chef's output
+
 	printf("Total #salads [ %d ]\n", *sum_of_salads);
 	printf("salads of salad_maker1 [%d] : [ %d ]\n",*sm1_pid, *onion_salads);
 	printf("salads of salad_maker2 [%d] : [ %d ]\n",*sm2_pid,*pepper_salads);
@@ -224,6 +229,6 @@ int main(int argc, char* argv[])
 	}
 
 	printf("Time intervals: (in increasing order)\n");
-	reading_data();
+	reading_data();		// function for reading the log file
 	
 }
