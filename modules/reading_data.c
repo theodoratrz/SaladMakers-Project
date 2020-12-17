@@ -1,20 +1,21 @@
-
 #include "reading_data.h"
+
 
 void reading_data()
 {
     FILE* file;
-    int nof_processes=0,flag=0, sm1=0,sm2=0,sm3=0;
+    int nof_processes=0,flag=0, sm1=0,sm2=0,sm3=0;                   // flags: nof_processes!=0 if another saladmaker has already started making a salad
+    // sm1/2/3 !=0 if they already 
     char *start_time,*start_name,*times, *pid, *name, *phrase;
     char ch;
-    times = malloc(16*sizeof(char));
+    times = malloc(16*sizeof(char));                                // allocate memory for the data(+1 because strcpy adds \0 at the end)
     start_time = malloc(16*sizeof(char));
     pid = malloc(7*sizeof(char));
     name = malloc(14*sizeof(char));
     start_name = malloc(14*sizeof(char));
     phrase = malloc(31*sizeof(char));
 
-    file = fopen("log_file.txt", "r");
+    file = fopen("log_file.txt", "r");                              // open file for reading
 	if(file == NULL)
     {
         perror("Opening file");
@@ -23,34 +24,34 @@ void reading_data()
 
     while(1)
     {
-        if(feof(file))
+        if(feof(file))                                          // stop when find file eof
         {
             break;
         }
 
-        fscanf(file, "%[^]]", times);
-        fscanf(file, "%c",&ch);
-        fscanf(file, "%c",&ch);
+        fscanf(file, "%[^]]", times);                           // read till "]"
+        fscanf(file, "%c",&ch);                                 // read "]"
+        fscanf(file, "%c",&ch);                                 // read " "
 
-        fscanf(file, "%[^]]", pid);
-        fscanf(file, "%c",&ch);
-        fscanf(file, "%c",&ch);
+        fscanf(file, "%[^]]", pid);                             // read till "]"
+        fscanf(file, "%c",&ch);                                 // read "]"
+        fscanf(file, "%c",&ch);                                 // read " "
 
-        fscanf(file, "%[^]]", name);
-        fscanf(file, "%c",&ch);
-        fscanf(file, "%c",&ch);
+        fscanf(file, "%[^]]", name);                            // read till "]"
+        fscanf(file, "%c",&ch);                                 // read "]"
+        fscanf(file, "%c",&ch);                                 // read " "
 
-        fscanf(file, "%[^]]", phrase);
-        fscanf(file, "%c",&ch);
-        fscanf(file, "%c",&ch);
+        fscanf(file, "%[^]]", phrase);                          // read till "]"
+        fscanf(file, "%c",&ch);                                 // read "]"
+        fscanf(file, "%c",&ch);                                 // read "\n"
 
-        if(!strcmp(phrase, "[Start making salad"))
+        if(!strcmp(phrase, "[Start making salad"))              // if you find this phrase
         {
-            if(nof_processes == 0)
+            if(nof_processes == 0)                              // first process that makes salad
             {
-                strcpy(start_time, times);
+                strcpy(start_time, times);                      // keep time and name
                 strcpy(start_name, name);
-                if( (!strcmp(name, "[Saladmaker1")) && (sm1 == 0))
+                if( (!strcmp(name, "[Saladmaker1")) && (sm1 == 0)) 
                 {
                     sm1 = 1;
                 }
@@ -62,7 +63,7 @@ void reading_data()
                 {
                     sm3 = 1;
                 }
-                nof_processes++;
+                nof_processes++;                                // increase running processes
             }
             else
             {
@@ -101,9 +102,9 @@ void reading_data()
             
             
         }
-        else if(!strcmp(phrase,"[End making salad"))
+        else if(!strcmp(phrase,"[End making salad"))        // if the first saladmaker(the first found) ends
         {
-            if(!(strcmp(name, start_name)))
+            if(!(strcmp(name, start_name)))                 // print the list of timelines
             {
                 flag = 0;
                 sm1=0;
@@ -117,7 +118,7 @@ void reading_data()
     
 
 	fclose(file);
-    free(name);
+    free(name);                                             // free all memory
     free(start_name);
     free(start_time);
     free(phrase);

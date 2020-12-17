@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
     flag1 = nof_salads+1;
 	flag2 = flag1+1;
 	flag3 = flag2+1;
-    sum_of_salads = flag3+1;
+    sum_of_salads = flag3+1;                    // sum of all salads
     onion_salads = sum_of_salads+1;
 	tomato_salads = onion_salads+1;
 	pepper_salads = tomato_salads+1;
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 	sm2_pid = sm1_pid+1;
 	sm3_pid = sm2_pid+1;
 
-    *onion_salads = 0;
+    *onion_salads = 0;                          // counts how many salads each saladmaker made
 	*tomato_salads = 0;
 	*pepper_salads = 0;
     pid = getpid();                             // each saladmaker's pid
@@ -92,7 +92,8 @@ int main(int argc, char* argv[])
         {
             sem_wait(onion_saladmaker);         // saladmaker 1 wants to enter its critical section
             *sm1_pid = pid;                     // chef wants to know the pid of each saladmaker
-            writing_data(now, local, "log_file.txt","Saladmaker1", pid, "Waiting for ingredients");
+            // because we write at the same file, writing must be in the critical section
+            writing_data(now, local, "log_file.txt","Saladmaker1", pid, "Waiting for ingredients");     
             writing_data(now, local, "log_file_sm1.txt","Saladmaker1", pid, "Waiting for ingredients");
             if((*nof_salads) != 0)              // if there are salads to be made
             {
@@ -107,27 +108,29 @@ int main(int argc, char* argv[])
             else
             {                                   // if all salads have been made
                 *flag1 = 0;                     // set flag to 1
+                // because we write at the same file, writing must be in the critical section
                 writing_data(now, local,"log_file.txt", "Saladmaker1", pid, "finished");
                 writing_data(now, local,"log_file_sm1.txt", "Saladmaker1", pid, "finished");
                 sem_post(chef);                 // post chef's semaphore
                 if (shmdt((void *)chef) == -1)  // detach the segment
-                {  /* shared memory detach */
+                {  
                     perror("Failed to destroy shared memory segment");
                     return 1;
                 }
 
                 return 0;
             }
-            sem_post(chef);
+            sem_post(chef);                     // post chef semaphore when exits the critical section
 
-            sleep(cooking_time);
+            sleep(cooking_time);                // this line represents the cooking time
 
-            sem_wait(onion_saladmaker);
-            (*onion_salads)++;
+            sem_wait(onion_saladmaker);         // saladmaker 1 wants to enter its critical section
+            (*onion_salads)++;                  // increase the counters 
             (*sum_of_salads)++;
+            // because we write at the same file, writing must be in the critical section
             writing_data(now, local,"log_file.txt", "Saladmaker1", pid, "End making salad");
             writing_data(now, local,"log_file_sm1.txt", "Saladmaker1", pid, "End making salad");
-            sem_post(chef);
+            sem_post(chef);                     // post chef semaphore when exits the critical section
         }
 
         break;
@@ -135,42 +138,45 @@ int main(int argc, char* argv[])
         while(1)
         {
             sem_wait(tomato_saladmaker);        // saladmaker 3 wants to enter its critical section
-            *sm3_pid = pid;
+            *sm3_pid = pid;                     // chef wants to know the pid of each saladmaker
+            // because we write at the same file, writing must be in the critical section
             writing_data(now, local, "log_file.txt","Saladmaker3", pid, "Waiting for ingredients");
-             writing_data(now, local, "log_file_sm3.txt","Saladmaker3", pid, "Waiting for ingredients");
-            if((*nof_salads) != 0)
+            writing_data(now, local, "log_file_sm3.txt","Saladmaker3", pid, "Waiting for ingredients");
+            if((*nof_salads) != 0)              // if there are salads to be made
             {
                 writing_data(now, local,"log_file.txt", "Saladmaker3", pid, "Get ingredients");
                 writing_data(now, local,"log_file_sm3.txt", "Saladmaker3", pid, "Get ingredients");
-                veggie_table[ONION]--;
+                veggie_table[ONION]--;          // saladmaker takes the ingredients from the table
                 veggie_table[PEPPER]--;
-                (*nof_salads)--;
+                (*nof_salads)--;                // update the number of salads left
                 writing_data(now, local,"log_file.txt", "Saladmaker3", pid, "Start making salad");
                 writing_data(now, local,"log_file_sm3.txt", "Saladmaker3", pid, "Start making salad");
             }
-            else
+            else                                // if all salads have been made
             {
-                *flag2 = 0;
+                *flag2 = 0;                     // set flag to 1
+                // because we write at the same file, writing must be in the critical section
                 writing_data(now, local, "log_file.txt","Saladmaker3", pid, "finished");
                 writing_data(now, local, "log_file_sm3.txt","Saladmaker3", pid, "finished");
-                sem_post(chef);
-                if (shmdt((void *)chef) == -1) 
-                {  /* shared memory detach */
+                sem_post(chef);                 // post chef's semaphore
+                if (shmdt((void *)chef) == -1)  // detach the segment
+                { 
                     perror("Failed to destroy shared memory segment");
                     return 1;
                 }
                 return 0;
             }
-            sem_post(chef);
+            sem_post(chef);                     // post chef semaphore when exits the critical section
             
-            sleep(cooking_time);
+            sleep(cooking_time);                // this line represents the cooking time
 
-            sem_wait(tomato_saladmaker);
-            (*tomato_salads)++;
+            sem_wait(tomato_saladmaker);        // saladmaker 3 wants to enter its critical section
+            (*tomato_salads)++;                 // increase the counters 
             (*sum_of_salads)++;
+            // because we write at the same file, writing must be in the critical section
             writing_data(now, local, "log_file.txt","Saladmaker3", pid, "End making salad");
             writing_data(now, local, "log_file_sm3.txt","Saladmaker3", pid, "End making salad");
-            sem_post(chef);
+            sem_post(chef);                     // post chef semaphore when exits the critical section
         }
 
         break;
@@ -178,42 +184,45 @@ int main(int argc, char* argv[])
         while(1)
         {
             sem_wait(pepper_saladmaker);        // saladmaker 2 wants to enter its critical section
-            *sm2_pid = pid;
+            *sm2_pid = pid;                     // chef wants to know the pid of each saladmaker
+            // because we write at the same file, writing must be in the critical section
             writing_data(now, local, "log_file.txt","Saladmaker2", pid, "Waiting for ingredients");
             writing_data(now, local, "log_file_sm2.txt","Saladmaker2", pid, "Waiting for ingredients");
-            if((*nof_salads) != 0)
+            if((*nof_salads) != 0)              // if there are salads to be made
             {
                 writing_data(now, local,"log_file.txt", "Saladmaker2", pid, "Get ingredients");
                 writing_data(now, local,"log_file_sm2.txt", "Saladmaker2", pid, "Get ingredients");
-                veggie_table[TOMATO]--;
+                veggie_table[TOMATO]--;         // saladmaker takes the ingredients from the table
                 veggie_table[ONION]--;
-                (*nof_salads)--;
+                (*nof_salads)--;                // update the number of salads left
                 writing_data(now, local,"log_file.txt", "Saladmaker2", pid, "Start making salad");
                 writing_data(now, local,"log_file_sm2.txt", "Saladmaker2", pid, "Start making salad");
             }
-            else
+            else                                // if all salads have been made
             {
-                *flag3 = 0;
+                *flag3 = 0;                     // set flag to 1
+                // because we write at the same file, writing must be in the critical section
                 writing_data(now, local,"log_file.txt", "Saladmaker2", pid, "finished");
                 writing_data(now, local,"log_file_sm2.txt", "Saladmaker2", pid, "finished");
-                sem_post(chef);
-                if (shmdt((void *)chef) == -1) 
-                {  /* shared memory detach */
+                sem_post(chef);                 // post chef's semaphore
+                if (shmdt((void *)chef) == -1)  // detach the segment
+                {  
                     perror("Failed to destroy shared memory segment");
                     return 1;
                 }
                 return 0;
             }
-            sem_post(chef);
+            sem_post(chef);                     // post chef semaphore when exits the critical section
 
-            sleep(cooking_time);
+            sleep(cooking_time);                // this line represents the cooking time
             
-            sem_wait(pepper_saladmaker);
-            (*pepper_salads)++;
+            sem_wait(pepper_saladmaker);        // saladmaker 2 wants to enter its critical section
+            (*pepper_salads)++;                 // increase the counters 
             (*sum_of_salads)++;
+            // because we write at the same file, writing must be in the critical section
             writing_data(now, local,"log_file.txt", "Saladmaker2", pid, "End making salad");
             writing_data(now, local,"log_file_sm2.txt", "Saladmaker2", pid, "End making salad");
-            sem_post(chef);
+            sem_post(chef);                     // post chef semaphore when exits the critical section
         }
 
         break;
