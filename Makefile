@@ -23,3 +23,6 @@ $(EXEC_C): $(OBJS_C)
 
 $(EXEC_S): $(OBJS_S)
 	$(CC) $(OBJS_S) -o $(EXEC_S) -pthread
+
+clean:
+	rm -f core $(EXEC_S) $(EXEC_C) $(OBJS_S) $(OBJS_C)
