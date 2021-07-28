@@ -1,4 +1,4 @@
-# Operational Systems 
+## 3rd Project in Operational Systems course
 
 **Compilation:** First we run cef with the command: *./chef -n numOfSlds -m mantime*  
 Chef prints the id of the shared segment.  
