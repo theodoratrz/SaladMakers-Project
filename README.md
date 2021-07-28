@@ -1,7 +1,5 @@
 # Operational Systems 
 
-An excercise based on POSIX semaphores and shared memory.
-
 **Compilation:** First we run cef with the command: *./chef -n numOfSlds -m mantime*  
 Chef prints the id of the shared segment.  
 Then we run the saladmakers with the command: *./saladmaker -t1 lb -t2 ub -i ingredient -s shmid*  
