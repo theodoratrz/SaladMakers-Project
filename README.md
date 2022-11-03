@@ -1,4 +1,10 @@
-## A project using shared memory as a part of Operational Systems course. Winter 2020
+## Shared Memory Project
+
+In this project, we implement independent programms, which run simultaneously. 
+
+**Requirements**
+- use semaphors to achieve a successful cooperation between the independent processes.
+- use a shared memory segment as that the processes can access variables and data sturctures in a right way.
 
 **Compilation:** First we run cef with the command: *./chef -n numOfSlds -m mantime*  
 Chef prints the id of the shared segment.  
