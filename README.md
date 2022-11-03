@@ -19,8 +19,8 @@ In this project, we implement independent programms, which run simultaneously as
 - Then we run the saladmakers with the command: `./saladmaker -t1 lb -t2 ub -i ingredient -s shmid`  
 
   `ingredient` can be one of the following:
-  - `o` for onion. The first saladmaker is responsi
-  - `p` for pepper == second saladmaker   
-  - `t` for tomato == third saladmaker
+  - `o` for onion
+  - `p` for pepper
+  - `t` for tomato
 
-  (example: assume we want to run saladmaker1: `./saladmaker -t1 1 -t2 3 **-i o** -s 12345`)
+  for example: assume we want to run saladmaker1: ```./saladmaker -t1 1 -t2 3 **-i o** -s 12345```
