@@ -3,6 +3,7 @@
 In this project, we implement independent programms, which run simultaneously as a part of the Operational Systems course.
 
 **Summary**
+
 ![image](https://user-images.githubusercontent.com/61420354/199811994-98800ae4-4db8-40b0-aa40-0f5b413288ef.png)
 
 
