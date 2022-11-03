@@ -15,7 +15,9 @@ In this project, we implement independent programms, which run simultaneously as
 - Use a shared memory segment as that the processes can access variables and data sturctures in a right way.
 
 **Compilation:** 
+
 First we run cef with the command: `./chef -n numOfSlds -m mantime`
+
   `numOfSlds` is the number pf salads we want to make
   
   `mantime` is the resting time of the chef
