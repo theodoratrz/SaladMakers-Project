@@ -23,4 +23,4 @@ In this project, we implement independent programms, which run simultaneously as
   - `p` for pepper
   - `t` for tomato
 
-  for example: assume we want to run saladmaker1: ```./saladmaker -t1 1 -t2 3 **-i o** -s 12345```
+  for example: assume we want to run saladmaker1: ```./saladmaker -t1 1 -t2 3 -i o -s 12345```
