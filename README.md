@@ -6,6 +6,9 @@ In this project, we implement independent programms, which run simultaneously as
 
 ![image](https://user-images.githubusercontent.com/61420354/199811994-98800ae4-4db8-40b0-aa40-0f5b413288ef.png)
 
+- Each saladmaker usees the ingredient that has access to and waits for the other ingredients to arrive at the shared table.
+-  When a saladmaker has every ingredient, starts to prepare the salad. This process takes a while, and when the salad is ready, it is delivered at the available waiter. 
+-  The chef each time chooses 2 of the ingredients randomly. This combination of vegetables can supply a specific saladmaker at a time. The chef "informs" the saladmaker to take the ingredients that he is need of. For example if the chef chooses tomato and onion he will inform the saladmaker with the peppers.
 
 **Goals/Tasks**
 - Use semaphors to achieve a successful cooperation between the independent processes.
