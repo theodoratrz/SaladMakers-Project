@@ -1,4 +1,4 @@
-## 3rd Project in Operational Systems course
+## A project using shared memory as a part of Operational Systems course. Winter 2020
 
 **Compilation:** First we run cef with the command: *./chef -n numOfSlds -m mantime*  
 Chef prints the id of the shared segment.  
