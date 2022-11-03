@@ -14,13 +14,22 @@ In this project, we implement independent programms, which run simultaneously as
 - Use semaphors to achieve a successful cooperation between the independent processes.
 - Use a shared memory segment as that the processes can access variables and data sturctures in a right way.
 
-**Compilation:** First we run cef with the command: `./chef -n numOfSlds -m mantime`
+**Compilation:** 
+First we run cef with the command: `./chef -n numOfSlds -m mantime`
+  `numOfSlds` is the number pf salads we want to make
+  
+  `mantime` is the resting time of the chef
+
 - Chef prints the id of the shared segment.  
 - Then we run the saladmakers with the command: `./saladmaker -t1 lb -t2 ub -i ingredient -s shmid`  
 
+  `lb` και `ub` are the minimum and the maximum time that the saladmaker works. The program choose a time between   the low and the upper bound. 
+  
   `ingredient` can be one of the following:
   - `o` for onion
   - `p` for pepper
   - `t` for tomato
 
+  `shmid` is the key for the shared memory segment
+  
   for example: assume we want to run saladmaker1: ```./saladmaker -t1 1 -t2 3 -i o -s 12345```
