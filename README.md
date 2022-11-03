@@ -1,6 +1,6 @@
 ## Shared Memory Project
 
-In this project, we implement independent programms, which run simultaneously. 
+In this project, we implement independent programms, which run simultaneously as a part of the Operational Systems course.
 
 **Goals/Tasks**
 - Use semaphors to achieve a successful cooperation between the independent processes.
